@@ -2,12 +2,13 @@ import gym
 import numpy as np
 from copy import deepcopy
 from matplotlib import pyplot as plt
+from collections import defaultdict
 
 def qlearning(episodes=2000, alpha=0.01, gamma=0.9, eps=0.1):
 
     env = gym.make("Roulette-v0")
     env.reset()
-    q = {s:{a: 0 for a in range(env.n)} for s in range(env.observation_space.n)}
+    q = defaultdict(lambda: defaultdict(int))
     rmse_list = []
     policy_list = []
 
@@ -15,7 +16,7 @@ def qlearning(episodes=2000, alpha=0.01, gamma=0.9, eps=0.1):
         print(f"Episode {_+1} of {episodes}...",end="\r")
 
         s = env.observation_space.sample()
-        policy = {s:max(q[s], key=q[s].get) for s in range(env.observation_space.n)}
+        policy = defaultdict(int)
 
         done = False
         while not done:
@@ -46,5 +47,5 @@ def rmse(observed_q, env):
 if __name__ == "__main__":
     q, policy, rmse_ql, policy_list = qlearning(episodes=10,eps=0.01)
     print(policy)
-    plt.plot(rmse_ql)
+    plt.plot(policy_list)
     plt.show()

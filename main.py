@@ -81,12 +81,13 @@ def rmse(observed_q, env):
     return np.sqrt(np.mean(residuals))
 
 if __name__ == "__main__":
-    q, policy, rmse_ql, policy_list = qlearning(episodes=10,eps=0.01)
+    EPISODES = 20
+    q, policy, rmse_ql, policy_list = qlearning(episodes=EPISODES,eps=0.01)
     print(policy)
-    plt.plot(policy_list)
-    plt.show()
+    plt.plot(rmse_ql)
 
-    q, policy, rmse_ql, policy_list = sarsa(episodes=10,eps=0.01)
+    q, policy, rmse_sarsa, policy_list = sarsa(episodes=EPISODES,eps=0.01)
     print(policy)
-    plt.plot(policy_list)
+    plt.plot(rmse_sarsa)
+    plt.legend(["Q Learning","SARSA"])
     plt.show()

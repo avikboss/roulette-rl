@@ -49,7 +49,6 @@ def qlearning(episodes=2000, alpha=0.01, gamma=0.9, eps=0.1):
     policy_list = []
 
     for _ in range(episodes):
-        print(f"Episode {_+1} of {episodes}...",end="\r")
 
         s = env.observation_space.sample()
         policy = defaultdict(int)
@@ -81,13 +80,29 @@ def rmse(observed_q, env):
     return np.sqrt(np.mean(residuals))
 
 if __name__ == "__main__":
-    EPISODES = 20
-    q, policy, rmse_ql, policy_list = qlearning(episodes=EPISODES,eps=0.01)
-    print(policy)
-    plt.plot(rmse_ql)
+    EPISODES = 50
+    EPOCHS = 5000
 
-    q, policy, rmse_sarsa, policy_list = sarsa(episodes=EPISODES,eps=0.01)
-    print(policy)
-    plt.plot(rmse_sarsa)
-    plt.legend(["Q Learning","SARSA"])
+    # find the average error over many runs of the algorithms
+    errors_ql = []
+    errors_sr = []
+    for i in range(EPOCHS):
+        q, policy, rmse_ql, policy_list = qlearning(episodes=EPISODES,eps=0.01)
+        errors_ql.append(rmse_ql)
+
+        q, policy, rmse_sarsa, policy_list = sarsa(episodes=EPISODES,eps=0.01)
+        errors_sr.append(rmse_sarsa)
+
+    mean_ep_error_ql = [np.mean([x[i] for x in errors_ql]) for i in range(EPISODES)]
+    mean_ep_error_sr = [np.mean([x[i] for x in errors_sr]) for i in range(EPISODES)]
+
+    plt.plot(mean_ep_error_ql)
+    plt.plot(mean_ep_error_sr)
+    plt.legend(["QL","SR"])
     plt.show()
+
+    # q, policy, rmse_sarsa, policy_list = sarsa(episodes=EPISODES,eps=0.01)
+    # print(policy)
+    # plt.plot(rmse_sarsa)
+    # plt.legend(["Q Learning","SARSA"])
+    # plt.show()

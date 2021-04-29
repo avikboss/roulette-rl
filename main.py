@@ -57,7 +57,11 @@ def qlearning(episodes=2000, alpha=0.01, gamma=0.9, eps=0.1):
         while not done:
             a = get_eps_greedy_action(env,eps, policy)
             next_s, reward, done, _ = env.step(a)
-            q[s][a] = q[s][a] + alpha * (reward + gamma*q[next_s][max(q[next_s],key=q[next_s].get)] - q[s][a])
+            try:
+                best_a = max(q[next_s],key=q[next_s].get)
+            except:
+                best_a = env.action_space.sample()
+            q[s][a] = q[s][a] + alpha * (reward + gamma*q[next_s][best_a] - q[s][a])
             policy[s] = max(q[s], key=q[s].get)
 
             s = next_s
@@ -66,7 +70,7 @@ def qlearning(episodes=2000, alpha=0.01, gamma=0.9, eps=0.1):
         policy_list.append(policy[0])
         env.reset()
 
-    policy = {s:max(q[s], key=q[s].get) for s in range(env.observation_space.n)}
+    policy = {s:max(q[s], key=q[s].get) for s in q.keys()}
     return q, policy, rmse_list, policy_list
 
 def get_eps_greedy_action(env,eps,policy):
@@ -76,12 +80,18 @@ def get_eps_greedy_action(env,eps,policy):
         return policy[0]
 
 def rmse(observed_q, env):
-    residuals = [(observed_q[s][a])**2 for s in range(env.observation_space.n) for a in range(env.action_space.n)]
+    expected_q = {0:{a:(-1/37) for a in range(env.action_space.n)}}
+    expected_q[0].update({37:0})
+    residuals = [(observed_q[s][a]-expected_q[s][a])**2 for s in expected_q.keys() for a in expected_q[0].keys()]
     return np.sqrt(np.mean(residuals))
 
 if __name__ == "__main__":
+    
     EPISODES = 50
     EPOCHS = 5000
+
+    # q, policy, rmse_ql, policy_list = qlearning(episodes=EPISODES,eps=0.01)
+    # print(policy)
 
     # find the average error over many runs of the algorithms
     errors_ql = []
@@ -101,8 +111,8 @@ if __name__ == "__main__":
     plt.legend(["QL","SR"])
     plt.show()
 
-    # q, policy, rmse_sarsa, policy_list = sarsa(episodes=EPISODES,eps=0.01)
-    # print(policy)
-    # plt.plot(rmse_sarsa)
-    # plt.legend(["Q Learning","SARSA"])
-    # plt.show()
+    # # q, policy, rmse_sarsa, policy_list = sarsa(episodes=EPISODES,eps=0.01)
+    # # print(policy)
+    # # plt.plot(rmse_sarsa)
+    # # plt.legend(["Q Learning","SARSA"])
+    # # plt.show()
